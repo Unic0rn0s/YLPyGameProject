@@ -5,25 +5,26 @@ import pygame
 from pygame import mixer
 from pygame.locals import *
 
+
 SIZE = WIDTH, HEIGHT = 1000, 650
 tile_size = 50
 
 pygame.font.init()
 
 # Шрифт
-score_font = pygame.font.SysFont('Bauhaus 93', 30)
+score_font = pygame.font.SysFont('Chiller', 50)
 
 # Звук
 mixer.init()
 pygame.mixer.music.load('sounds/soundtrack.mp3')
-pygame.mixer.music.set_volume(0.2)
+pygame.mixer.music.set_volume(0.07)
 pygame.mixer.music.play(-1, 0.0, 5000)
 potion_fx = pygame.mixer.Sound('sounds/potion.wav')
-potion_fx.set_volume(0.2)
+potion_fx.set_volume(0.1)
 jump_fx = pygame.mixer.Sound('sounds/jump.wav')
-jump_fx.set_volume(0.3)
+jump_fx.set_volume(0.1)
 dead_fx = pygame.mixer.Sound('sounds/dead.wav')
-dead_fx.set_volume(0.2)
+dead_fx.set_volume(0.1)
 sounds = [potion_fx]
 
 # Изображения
@@ -34,6 +35,7 @@ game_over_rect = game_over_img.get_rect(center=(WIDTH // 2, HEIGHT // 2 - HEIGHT
 
 
 class World:
+
 	def __init__(self, win, data, groups):
 		self.tile_list = []
 		self.win = win
@@ -120,9 +122,6 @@ class World:
 
 				col_count += 1
 			row_count += 1
-
-			diamond = Potion((WIDTH // tile_size - 3) * tile_size, tile_size // 2)
-			self.groups[3].add(diamond)
 
 	def draw(self):
 		for tile in self.tile_list:
@@ -469,6 +468,25 @@ class Slime(pygame.sprite.Sprite):
 			self.move_counter *= -1
 
 
+class Wave(pygame.sprite.Sprite):
+
+	def __init__(self, x, y, direct):
+		super(Wave, self).__init__()
+
+		self.direct = direct
+		self.image = pygame.transform.scale(pygame.image.load('tiles/30.png'), (30, 20))
+		if self.direct == -1:
+			self.image = pygame.transform.flip(self.image, True, False)
+		self.rect = self.image.get_rect()
+		self.rect.x = x
+		self.rect.y = y
+
+	def update(self):
+		self.rect.x += 5 * self.direct
+		if self.rect.x < 0 or self.rect.x > WIDTH or self.rect.y < 0 or self.rect.y > HEIGHT:
+			self.kill()
+
+
 class Button(pygame.sprite.Sprite):
 
 	def __init__(self, img, scale, x, y):
@@ -510,5 +528,6 @@ def load_level(level):
 
 # Отображение текста
 def draw_text(win, text, pos):
-	img = score_font.render(text, True, (30, 144, 255))
+	img = score_font.render(text, True, (255, 204, 0))
 	win.blit(img, pos)
+	win.blit(score_font.render('Rage:', True, (255, 204, 0)), (800, 30))
